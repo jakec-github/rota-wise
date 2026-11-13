@@ -104,7 +104,7 @@ func TestHarden_AHostedServerPromisesHTTPS(t *testing.T) {
 	auth := newTestAuthenticator()
 	auth.secure = true
 	east := NewHandler(serverStore(), testVolunteers(), eastOrganisation, auth, testFrontend, nil, nil, nil, zap.NewNop())
-	server := Mount(auth, []*Handler{east}, testFrontend, databaseUp, zap.NewNop())
+	server := Mount(auth, []*Handler{east}, testFrontend, testSite, databaseUp, zap.NewNop())
 
 	rec := doRequest(t, server, http.MethodGet, "/org/east/", "")
 

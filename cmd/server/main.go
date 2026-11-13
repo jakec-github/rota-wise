@@ -24,6 +24,7 @@ import (
 	"github.com/jakechorley/ilford-drop-in/pkg/core/services"
 	"github.com/jakechorley/ilford-drop-in/pkg/db"
 	"github.com/jakechorley/ilford-drop-in/pkg/utils/logging"
+	"github.com/jakechorley/ilford-drop-in/site"
 	"github.com/jakechorley/ilford-drop-in/web"
 )
 
@@ -180,7 +181,7 @@ func run(env string, portOverride int) error {
 
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", cfg.Server.Port),
-		Handler:           api.Mount(authenticator, handlers, web.Dist(), database, logger),
+		Handler:           api.Mount(authenticator, handlers, web.Dist(), site.FS(), database, logger),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

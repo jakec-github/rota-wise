@@ -37,7 +37,7 @@ func newServer(t *testing.T, health Pinger) (http.Handler, *Authenticator) {
 	auth := newTestAuthenticator()
 	east := NewHandler(serverStore(), testVolunteers(), eastOrganisation, auth, testFrontend, nil, nil, nil, zap.NewNop())
 	west := NewHandler(&mockStore{}, testVolunteers(), westOrganisation, auth, testFrontend, nil, nil, nil, zap.NewNop())
-	return Mount(auth, []*Handler{east, west}, testFrontend, health, zap.NewNop()), auth
+	return Mount(auth, []*Handler{east, west}, testFrontend, testSite, health, zap.NewNop()), auth
 }
 
 func serverStore() *mockStore {
@@ -136,15 +136,20 @@ func TestServer_OrganisationSaysWhoItIs(t *testing.T) {
 	assert.JSONEq(t, `{"id":"west","displayName":"West Organisation"}`, rec.Body.String())
 }
 
-// The root is the app, with no Organisation in its base: what it says is the
-// frontend's splash, tested there.
-func TestServer_RootIsTheAppWithNoOrganisation(t *testing.T) {
+// The root is the splash, a page of its own; the app's assets and its own root
+// pages sit beside it.
+func TestServer_RootIsTheSplash(t *testing.T) {
 	server, _ := newServer(t, databaseUp)
 
 	rec := doRequest(t, server, http.MethodGet, "/", "")
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.Contains(t, rec.Header().Get("Content-Type"), "text/html")
-	assert.Contains(t, rec.Body.String(), baseTag)
+	assert.Equal(t, "<html>splash</html>", rec.Body.String())
+
+	css := doRequest(t, server, http.MethodGet, "/site/splash.css", "")
+	assert.Equal(t, http.StatusOK, css.Code)
+	assert.Equal(t, "body{}", css.Body.String())
+	assert.Contains(t, css.Header().Get("Content-Type"), "text/css")
 
 	asset := doRequest(t, server, http.MethodGet, "/chunk-abc.js", "")
 	assert.Equal(t, http.StatusOK, asset.Code)
@@ -154,6 +159,27 @@ func TestServer_RootIsTheAppWithNoOrganisation(t *testing.T) {
 	guide := doRequest(t, server, http.MethodGet, "/guide", "")
 	assert.Equal(t, http.StatusOK, guide.Code)
 	assert.Contains(t, guide.Body.String(), baseTag)
+
+	// A page is only ever fetched.
+	post := doRequest(t, server, http.MethodPost, "/", "")
+	assert.Equal(t, http.StatusMethodNotAllowed, post.Code)
+}
+
+// The splash's assets are only its own: a missing one, its folder, its files
+// outside the prefix and the app's assets under its prefix are all the same
+// missing page as anywhere else.
+func TestServer_SplashAssetsAreOnlyItsOwn(t *testing.T) {
+	server, _ := newServer(t, databaseUp)
+	missing := doRequest(t, server, http.MethodGet, "/no-such-page", "")
+	require.Equal(t, http.StatusNotFound, missing.Code)
+
+	for _, path := range []string{
+		"/site/nope.css", "/site/", "/site", "/static/splash.css", "/site/chunk-abc.js",
+	} {
+		rec := doRequest(t, server, http.MethodGet, path, "")
+		assert.Equal(t, http.StatusNotFound, rec.Code, path)
+		assert.Equal(t, missing.Body.String(), rec.Body.String(), path)
+	}
 }
 
 // /org/east and /org/east/ are the same page, and the second is the one every

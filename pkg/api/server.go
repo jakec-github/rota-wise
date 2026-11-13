@@ -41,23 +41,24 @@ type Pinger interface {
 //     who you are, which is the same everywhere.
 //   - /health, because it is infrastructure, not site: the deploy workflow,
 //     scripts/deploy-config.sh and scripts/dev-stack.sh all poll it.
+//   - / itself is the splash: a static page of its own (package site), its
+//     assets under /site/. It names and links to no Organisation, since an
+//     Organisation's address is the only way in (ADR 0011).
 //   - Everything else is the frontend, served with its base at the root. With
-//     no Organisation in its base the app renders the splash at / and its
-//     "Page not found" anywhere else; the splash names and links to no
-//     Organisation, since an Organisation's address is the only way in
-//     (ADR 0011).
+//     no Organisation in its base the app renders the organiser's guide at
+//     /guide and its "Page not found" anywhere else.
 //
 // An Organisation id that is not configured falls through to that same 404
 // page as any other missing path, byte for byte, so ids cannot be probed for.
 //
 // All of it sits behind harden: cross-origin protection, a body limit and the
 // security headers, for every request alike.
-func Mount(auth *Authenticator, organisations []*Handler, frontend fs.FS, health Pinger, logger *zap.Logger) http.Handler {
+func Mount(auth *Authenticator, organisations []*Handler, frontend, site fs.FS, health Pinger, logger *zap.Logger) http.Handler {
 	root := http.NewServeMux()
 	root.Handle("GET /health", healthHandler(health, logger))
 	auth.registerRoutes(root)
 	if hasFrontend(frontend) {
-		root.Handle("/", rootFrontendHandler(frontend))
+		root.Handle("/", rootFrontendHandler(frontend, site))
 	}
 
 	for _, h := range organisations {

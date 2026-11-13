@@ -45,7 +45,7 @@ current run.
 The dev config's one Organisation is `dev-org`, so the app is at
 `http://localhost:8080/org/dev-org/` and its API under
 `/org/dev-org/api/`. Paths below written without a host — `GET /api/shifts` —
-are under that prefix. `/` is a splash page that links nowhere, and `/health`
+are under that prefix. `/` is the splash page (`site/`), naming no Organisation, and `/health`
 and `/auth` are at the root ([ADR 0011](../adr/0011-one-server-many-organisations.md)).
 
 ```bash

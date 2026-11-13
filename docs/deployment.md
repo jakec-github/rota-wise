@@ -317,10 +317,12 @@ afterwards, along with the API the pages call:
 
 What stays at the root of the domain:
 
-- **`/`**, a splash page that names and links to no Organisation. An
-  Organisation's address is the only way in. An unknown id gets the same
-  "Page not found" as any other missing path, with a 404. Both are the React
-  app, with its assets served at the root too.
+- **`/`**, the splash page: a static page of its own, `site/`, embedded in the
+  binary with its assets under `/site/`. It names and links to no
+  Organisation; an Organisation's address is the only way in.
+- **`/guide`** and every other path: the React app with its base at the root,
+  its assets served there too. An unknown id gets the same "Page not found" as
+  any other missing path, with a 404.
 - **`/auth`.** The callback URI is registered by hand in the Google console, so
   one shared `/auth/callback` is a one-time step however many Organisations a
   server runs. **Adding an Organisation changes nothing about the Google web
