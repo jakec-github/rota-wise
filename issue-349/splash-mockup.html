@@ -104,10 +104,10 @@
               box-shadow: 0 1px 2px rgba(15,42,35,.04); }
   .sentence mark { background: none; color: inherit; border-radius: 4px; padding: 0 2px; position: relative; }
   .sentence mark::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -3px; height: 3px; border-radius: 3px; }
-  .sentence .m1 { background: rgba(37,99,235,.08); }  .sentence .m1::after { background: var(--p1); }
-  .sentence .m2 { background: rgba(13,148,136,.09); } .sentence .m2::after { background: var(--p2); }
+  .sentence .m1 { background: rgba(19,163,138,.10); }  .sentence .m1::after { background: var(--g2); }
+  .sentence .m2 { background: rgba(19,163,138,.10); } .sentence .m2::after { background: var(--g2); }
   .sentence .m3 { background: rgba(139,92,246,.09); } .sentence .m3::after { background: var(--p3); }
-  .sentence .m4 { background: rgba(219,39,119,.08); } .sentence .m4::after { background: var(--p4); }
+  .sentence .m4 { background: rgba(139,92,246,.09); } .sentence .m4::after { background: var(--p3); }
   .caret { display: inline-block; width: 2.5px; height: 1.05em; vertical-align: -4px; margin-left: 3px; border-radius: 2px;
            background: var(--grad); box-shadow: 0 0 12px rgba(19,163,138,.7); animation: blink 1.05s steps(1) infinite; }
   @keyframes blink { 50% { opacity: 0; } }
@@ -134,6 +134,26 @@
   .cal .d.on { color: #fff; font-weight: 700; background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 4px 10px -3px rgba(19,163,138,.6); }
   .cal .d.on2 { color: #fff; font-weight: 700; background: linear-gradient(135deg, #7c3aed, #c084fc); box-shadow: 0 4px 10px -3px rgba(139,92,246,.6); }
 
+
+  .months { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .month { background: rgba(255,255,255,.92); border: 1px solid var(--border); border-radius: 16px; padding: 14px 14px 16px; }
+  .month .mh { display: flex; align-items: baseline; margin-bottom: 6px; }
+  .month .mh b { color: var(--text-h); font-size: 15px; letter-spacing: -0.01em; }
+  .month .mh span { font-size: 12.5px; font-weight: 500; color: var(--text); }
+  .mg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .mg .dow { text-align: center; font-size: 10.5px; font-weight: 600; color: #8a9893; padding: 4px 0 2px; }
+  .mg .dow:nth-child(6) { color: var(--g1); } .mg .dow:nth-child(7) { color: #7c3aed; }
+  .mg .d { height: 62px; border-radius: 9px; background: rgba(15,42,35,.03); padding: 5px 6px; font-size: 11px; color: #9aa7a2; font-weight: 500;
+           display: flex; flex-direction: column; justify-content: space-between; }
+  .mg .d.blank { background: none; }
+  .mg .d.past { opacity: .5; }
+  .shift { border-radius: 6px; padding: 3px 6px; font-size: 10.5px; font-weight: 650; color: #fff; line-height: 1.25; }
+  .shift small { display: block; font-weight: 500; opacity: .85; font-size: 9.5px; }
+  .shift.a { background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 4px 10px -4px rgba(19,163,138,.7); }
+  .shift.b { background: linear-gradient(135deg, #7c3aed, #a78bfa); box-shadow: 0 4px 10px -4px rgba(139,92,246,.7); }
+  .mg .d.has { color: var(--text-h); font-weight: 700; background: rgba(255,255,255,1); box-shadow: 0 0 0 1px var(--border) inset; }
+  .sw { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .sw.a { background: linear-gradient(135deg, var(--g1), var(--g2)); } .sw.b { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
   .meta { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
   .pill { display: inline-flex; gap: 7px; align-items: center; font-size: 12.5px; padding: 6px 12px; border-radius: 99px; background: rgba(15,42,35,.045); color: var(--text); }
   .pill b { color: var(--text-h); font-weight: 600; }
@@ -194,32 +214,20 @@
     <div class="board">
       <div class="board-top">
         <span class="prompt-label"><span class="dot"></span>Shift pattern</span>
-        <span class="model"><b>claude-sonnet</b> · structured output</span>
+        <span class="model"><b>Claude</b> · checked before it's shown</span>
       </div>
       <div class="sentence"><mark class="m1">Every Saturday</mark> <mark class="m2">10am to 2pm</mark>, and <mark class="m3">the first Sunday of the month</mark> <mark class="m4">12 till 4</mark><span class="caret"></span></div>
       <div class="gap"></div>
-      <div class="out">
-        <div class="chip" data-title="Event 1"><span class="k">BEGIN:</span>VEVENT
-<span class="k">DTSTART:</span>20261107T<span class="p2">100000</span>
-<span class="k">DURATION:</span><span class="p2">PT4H</span>
-<span class="k">RRULE:</span><span class="p1">FREQ=WEEKLY;BYDAY=SA</span>
-<span class="k">END:</span>VEVENT</div>
-        <div class="chip" data-title="Event 2"><span class="k">BEGIN:</span>VEVENT
-<span class="k">DTSTART:</span>20261101T<span class="p4">120000</span>
-<span class="k">DURATION:</span><span class="p4">PT4H</span>
-<span class="k">RRULE:</span><span class="p3">FREQ=MONTHLY;BYDAY=1SU</span>
-<span class="k">END:</span>VEVENT</div>
-        <div class="cal-wrap">
-          <div class="cal-head">November 2026 <span>5 shifts</span></div>
-          <div class="cal" data-cal></div>
-        </div>
+      <div class="months">
+        <div class="month" data-month="2026-11"></div>
+        <div class="month" data-month="2026-12"></div>
       </div>
       <div class="meta">
         <span class="pill ok">✓ <b>Parser accepted</b> first reply</span>
+        <span class="pill"><span class="sw a"></span>Saturdays · 10:00–14:00</span>
+        <span class="pill"><span class="sw b"></span>First Sunday · 12:00–16:00</span>
         <span class="pill"><b>64</b> shifts in the next year</span>
-        <span class="pill"><b>1.8s</b> to translate</span>
-        <span class="pill">Saved only once you confirm</span>
-      </div>
+                      </div>
       <svg data-lines></svg>
     </div>
   </div>
@@ -243,37 +251,47 @@
   </div>
 </section>
 
-<p class="note">Mockup: direction C restyled. The board is the still frame #350 animates (typing, then the lines draw in). The "1.8s" and stat copy are placeholders to check against the eval reports.</p>
+<p class="note">Mockup: direction C restyled. The board is the still frame #350 animates: the sentence types, then the lines draw down and the shifts land. No iCalendar is shown. The stat copy is a placeholder to check against the eval reports.</p>
 
 <script>
   const mark = `<rect x="2" y="2" width="28" height="28" rx="7" fill="#2f6f5e"/><rect x="2" y="2" width="28" height="9" rx="7" fill="#1f4f42"/><rect x="2" y="7" width="28" height="4" fill="#1f4f42"/><g fill="#fff"><rect x="6" y="15" width="4" height="11" rx="1.5"/><rect x="11.5" y="15" width="4" height="7" rx="1.5" opacity=".4"/><rect x="17" y="15" width="4" height="11" rx="1.5"/><rect x="22.5" y="15" width="4" height="4" rx="1.5" opacity=".4"/></g>`;
   document.querySelectorAll("svg.logo").forEach(s => { s.setAttribute("viewBox", "0 0 32 32"); s.innerHTML = mark; });
 
-  document.querySelectorAll("[data-cal]").forEach(el => {
-    let h = ["M","T","W","T","F","S","S"].map(d => `<div class="dow">${d}</div>`).join("");
-    for (let i = 0; i < 6; i++) h += `<div class="d blank"></div>`;
-    for (let d = 1; d <= 30; d++) {
-      const dow = (6 + d - 1) % 7;
-      const cls = d === 1 ? "on2" : dow === 5 ? "on" : "";
-      h += `<div class="d ${cls}">${d}</div>`;
+  // Each month, Monday first: Saturdays get the 10–2 shift, the first Sunday the 12–4.
+  document.querySelectorAll("[data-month]").forEach(el => {
+    const [y, m] = el.dataset.month.split("-").map(Number);
+    const first = new Date(y, m - 1, 1), days = new Date(y, m, 0).getDate();
+    const off = (first.getDay() + 6) % 7;
+    let n = 0, h = ["M","T","W","T","F","S","S"].map(d => `<div class="dow">${d}</div>`).join("");
+    for (let i = 0; i < off; i++) h += `<div class="d blank"></div>`;
+    let seenSunday = false;
+    for (let d = 1; d <= days; d++) {
+      const dow = (off + d - 1) % 7;
+      let shift = "";
+      if (dow === 5) shift = `<div class="shift a" data-k="a">Sat<small>10:00–14:00</small></div>`;
+      if (dow === 6 && !seenSunday) { seenSunday = true; shift = `<div class="shift b" data-k="b">Sun<small>12:00–16:00</small></div>`; }
+      if (shift) n++;
+      h += `<div class="d ${shift ? "has" : ""}">${d}${shift}</div>`;
     }
-    el.innerHTML = h;
+    const name = first.toLocaleString("en-GB", { month: "long", year: "numeric" });
+    el.innerHTML = `<div class="mh"><b>${name} <span>· ${n} shifts</span></b></div><div class="mg">${h}</div>`;
   });
 
+  // Thread each phrase down to the first shift it made.
   function thread() {
     const board = document.querySelector(".board"), svg = board.querySelector("svg[data-lines]");
     const b = board.getBoundingClientRect();
-    const cols = { 1: "#2563eb", 2: "#0d9488", 3: "#8b5cf6", 4: "#db2777" };
+    const links = [["m1","a","#13a38a"],["m2","a","#13a38a"],["m3","b","#8b5cf6"],["m4","b","#8b5cf6"]];
     let out = "";
-    for (const k in cols) {
-      const m = board.querySelector(".m" + k).getBoundingClientRect();
-      const span = board.querySelector(".chip .p" + k), t = span.getBoundingClientRect(), c = span.closest(".chip").getBoundingClientRect();
+    for (const [mk, k, col] of links) {
+      const m = board.querySelector("." + mk).getBoundingClientRect();
+      const t = document.querySelectorAll(".month")[0].querySelectorAll(".dow")[k === "a" ? 5 : 6].getBoundingClientRect();
       const x1 = m.left + m.width / 2 - b.left, y1 = m.bottom - b.top + 22;
-      const x2 = t.left + Math.min(t.width / 2, 30) - b.left, y2 = c.top - b.top - 4;
-      const my = (y1 + y2) / 2;
-      out += `<circle cx="${x1}" cy="${y1}" r="3" fill="${cols[k]}"/>`;
-      out += `<path d="M${x1} ${y1} C${x1} ${my}, ${x2} ${my}, ${x2} ${y2}" stroke="${cols[k]}" stroke-width="1.75" fill="none" stroke-linecap="round"/>`;
-      out += `<circle cx="${x2}" cy="${y2}" r="3.5" fill="#0d1714" stroke="${cols[k]}" stroke-width="2"/>`;
+      const x2 = t.left + t.width / 2 - b.left, y2 = t.top - b.top - 3;
+      const my = y1 + (y2 - y1) * 0.45;
+      out += `<circle cx="${x1}" cy="${y1}" r="3" fill="${col}"/>`;
+      out += `<path d="M${x1} ${y1} C${x1} ${my}, ${x2} ${my}, ${x2} ${y2}" stroke="${col}" stroke-width="1.75" fill="none" stroke-linecap="round" opacity=".85"/>`;
+      out += `<circle cx="${x2}" cy="${y2}" r="3.5" fill="#fff" stroke="${col}" stroke-width="2"/>`;
     }
     svg.innerHTML = out;
   }
