@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rota Wise: direction C, start-up polish</title>
+<style>
+  :root {
+    color-scheme: light;
+    --text: #55625d;
+    --text-h: #0b1714;
+    --border: rgba(15, 42, 35, 0.09);
+    --band: #1f4f42;
+    --accent: #2f6f5e;
+    /* The gradient: the logo's greens running out into teal and violet. */
+    --g1: #1f6f58;
+    --g2: #13a38a;
+    --g3: #3b82f6;
+    --g4: #8b5cf6;
+    --grad: linear-gradient(100deg, var(--g1) 0%, var(--g2) 35%, var(--g3) 70%, var(--g4) 100%);
+    --p1: #2563eb; --p2: #0d9488; --p3: #8b5cf6; --p4: #db2777;
+    --sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font: 16px/1.5 var(--sans);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fcfdfd; overflow-x: hidden; }
+  h1, h2, h3 { color: var(--text-h); margin: 0; }
+
+  /* --- backdrop: aurora blobs over a faint dot grid that fades out --- */
+  .sky { position: relative; isolation: isolate; overflow: hidden; }
+  .sky::before {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background-image: radial-gradient(rgba(15,42,35,.13) 1px, transparent 1px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, #000 30%, transparent 75%);
+            mask-image: radial-gradient(ellipse 70% 55% at 50% 30%, #000 30%, transparent 75%);
+  }
+  .blob { position: absolute; z-index: -1; border-radius: 50%; filter: blur(80px); opacity: .55; animation: drift 18s ease-in-out infinite alternate; }
+  .blob.b1 { width: 520px; height: 420px; left: -120px; top: -60px; background: #a7f3d0; }
+  .blob.b2 { width: 560px; height: 460px; right: -140px; top: 40px; background: #c4b5fd; animation-delay: -6s; }
+  .blob.b3 { width: 520px; height: 380px; left: 35%; top: 360px; background: #99f6e4; opacity: .45; animation-delay: -12s; }
+  .blob.b4 { width: 380px; height: 300px; right: 18%; top: 520px; background: #bfdbfe; opacity: .5; animation-delay: -3s; }
+  @keyframes drift { to { transform: translate(40px, 30px) scale(1.08); } }
+
+  /* --- nav --- */
+  .nav { position: sticky; top: 14px; z-index: 5; max-width: 1140px; margin: 14px auto 0; display: flex; align-items: center; justify-content: space-between;
+         padding: 10px 12px 10px 18px; border-radius: 16px; background: rgba(255,255,255,.6); backdrop-filter: blur(14px) saturate(1.4);
+         -webkit-backdrop-filter: blur(14px) saturate(1.4); border: 1px solid rgba(255,255,255,.8); box-shadow: 0 1px 0 rgba(15,42,35,.04), 0 8px 30px rgba(15,42,35,.06); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text-h); font-size: 17px; letter-spacing: -0.01em; }
+  .links { display: flex; gap: 6px; font-size: 14px; align-items: center; }
+  .links a { color: var(--text); text-decoration: none; padding: 7px 12px; border-radius: 10px; }
+  .links a:hover { background: rgba(15,42,35,.05); color: var(--text-h); }
+  .links a.gh { display: inline-flex; gap: 8px; align-items: center; color: #fff; background: var(--text-h); font-weight: 600; }
+
+  /* --- hero --- */
+  .hero { max-width: 1140px; margin: 0 auto; padding: 84px 20px 40px; text-align: center; }
+  .badge { position: relative; display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; color: var(--text-h);
+           padding: 6px 14px 6px 6px; border-radius: 99px; background: rgba(255,255,255,.75); }
+  .badge::before { /* gradient hairline border */
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--grad);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .badge .new { font-size: 11.5px; font-weight: 700; color: #fff; background: var(--grad); padding: 3px 9px; border-radius: 99px; letter-spacing: .02em; }
+  .badge .arrow { color: var(--g2); }
+  h1.big { font-size: 92px; line-height: .98; letter-spacing: -0.045em; font-weight: 750; margin: 26px auto 22px; max-width: 12ch; }
+  .shine {
+    background: linear-gradient(100deg, var(--g1), var(--g2), var(--g3), var(--g4), var(--g2), var(--g1));
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shine 9s linear infinite;
+    padding-bottom: .06em; /* keep the descender inside the clip */
+  }
+  @keyframes shine { to { background-position: 300% 0; } }
+  .lede { font-size: 20px; max-width: 54ch; margin: 0 auto 34px; color: var(--text); }
+  .cta { display: flex; gap: 12px; justify-content: center; }
+  .btn { display: inline-flex; align-items: center; gap: 9px; padding: 13px 22px; border-radius: 12px; font-weight: 600; font-size: 15.5px; text-decoration: none; }
+  .btn.primary { color: #fff; background: var(--text-h); position: relative;
+                 box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset, 0 10px 30px -6px rgba(19,163,138,.55), 0 4px 18px -4px rgba(139,92,246,.45); }
+  .btn.primary .spark { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 16px; }
+  .btn.ghost { color: var(--text-h); background: rgba(255,255,255,.7); border: 1px solid var(--border); backdrop-filter: blur(8px); }
+  .kbd { font: 12px var(--mono); padding: 2px 6px; border-radius: 6px; background: rgba(15,42,35,.06); color: var(--text); }
+
+  /* --- the board --- */
+  .stage { max-width: 1140px; margin: 56px auto 0; padding: 0 20px; position: relative; }
+  .stage::before { /* glow under the board */
+    content: ""; position: absolute; left: 10%; right: 10%; top: 30px; bottom: -20px; z-index: -1; border-radius: 40px;
+    background: var(--grad); filter: blur(60px); opacity: .28; }
+  .board { position: relative; border-radius: 24px; padding: 34px 38px 26px;
+           background: linear-gradient(rgba(255,255,255,.82), rgba(255,255,255,.82)) padding-box,
+                       linear-gradient(120deg, rgba(19,163,138,.55), rgba(59,130,246,.25) 40%, rgba(139,92,246,.55)) border-box;
+           border: 1px solid transparent; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+           box-shadow: 0 1px 0 #fff inset, 0 30px 80px -20px rgba(15,42,35,.25); text-align: left; }
+  .board-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; font-size: 12.5px; }
+  .prompt-label { display: inline-flex; gap: 8px; align-items: center; font-weight: 600; color: var(--text-h); }
+  .prompt-label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g2); box-shadow: 0 0 0 4px rgba(19,163,138,.18); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 8px rgba(19,163,138,0); } }
+  .model { font: 12px var(--mono); color: var(--text); padding: 4px 10px; border-radius: 99px; background: rgba(15,42,35,.05); }
+  .model b { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .sentence { font-size: 28px; line-height: 1.35; color: var(--text-h); font-weight: 500; letter-spacing: -0.015em; white-space: nowrap;
+              padding: 16px 20px; border-radius: 14px; background: rgba(255,255,255,.9); border: 1px solid var(--border);
+              box-shadow: 0 1px 2px rgba(15,42,35,.04); }
+  .sentence mark { background: none; color: inherit; border-radius: 4px; padding: 0 2px; position: relative; }
+  .sentence mark::after { content: ""; position: absolute; left: 2px; right: 2px; bottom: -3px; height: 3px; border-radius: 3px; }
+  .sentence .m1 { background: rgba(37,99,235,.08); }  .sentence .m1::after { background: var(--p1); }
+  .sentence .m2 { background: rgba(13,148,136,.09); } .sentence .m2::after { background: var(--p2); }
+  .sentence .m3 { background: rgba(139,92,246,.09); } .sentence .m3::after { background: var(--p3); }
+  .sentence .m4 { background: rgba(219,39,119,.08); } .sentence .m4::after { background: var(--p4); }
+  .caret { display: inline-block; width: 2.5px; height: 1.05em; vertical-align: -4px; margin-left: 3px; border-radius: 2px;
+           background: var(--grad); box-shadow: 0 0 12px rgba(19,163,138,.7); animation: blink 1.05s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .gap { height: 78px; }
+  svg[data-lines] { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  svg[data-lines] path { stroke-dasharray: 4 5; animation: flow 1.2s linear infinite; }
+  @keyframes flow { to { stroke-dashoffset: -18; } }
+
+  .out { display: grid; grid-template-columns: 1fr 1fr 300px; gap: 18px; align-items: start; }
+  .chip { border-radius: 14px; padding: 14px 16px; background: #0d1714; color: #b9c8c2; font: 12.5px/1.65 var(--mono); white-space: pre;
+          box-shadow: 0 12px 30px -12px rgba(13,23,20,.5); position: relative; overflow: hidden; }
+  .chip::before { content: attr(data-title); display: block; font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #6f857d; margin-bottom: 8px; }
+  .chip .k { color: #6f857d; }
+  .chip .p1 { color: #93b4ff; } .chip .p2 { color: #5eead4; } .chip .p3 { color: #c4b5fd; } .chip .p4 { color: #f9a8d4; }
+
+  .cal-wrap { background: rgba(255,255,255,.9); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+  .cal-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-h); margin-bottom: 8px; }
+  .cal-head span { color: var(--text); font-weight: 500; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 11px; }
+  .cal .dow { text-align: center; font-weight: 600; color: #8a9893; font-size: 10px; }
+  .cal .d { aspect-ratio: 1; border-radius: 7px; background: rgba(15,42,35,.035); color: #9aa7a2; display: grid; place-items: center; font-weight: 500; }
+  .cal .d.blank { background: none; }
+  .cal .d.on { color: #fff; font-weight: 700; background: linear-gradient(135deg, var(--g1), var(--g2)); box-shadow: 0 4px 10px -3px rgba(19,163,138,.6); }
+  .cal .d.on2 { color: #fff; font-weight: 700; background: linear-gradient(135deg, #7c3aed, #c084fc); box-shadow: 0 4px 10px -3px rgba(139,92,246,.6); }
+
+  .meta { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .pill { display: inline-flex; gap: 7px; align-items: center; font-size: 12.5px; padding: 6px 12px; border-radius: 99px; background: rgba(15,42,35,.045); color: var(--text); }
+  .pill b { color: var(--text-h); font-weight: 600; }
+  .pill.ok { background: rgba(19,163,138,.1); color: #0f766e; }
+  .pill.ok b { color: #0f766e; }
+
+  /* --- built-with strip --- */
+  .built { text-align: center; padding: 70px 20px 20px; font-size: 13px; color: #8a9893; letter-spacing: .02em; }
+  .built .row { display: flex; gap: 44px; justify-content: center; margin-top: 14px; }
+  .built .row span { font-size: 17px; font-weight: 650; color: #24312d; opacity: .5; letter-spacing: -0.01em; }
+
+  /* --- how it carries into the page below --- */
+  .sec { max-width: 1140px; margin: 0 auto; padding: 90px 20px 110px; }
+  .kicker { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+            background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 12px; }
+  .sec h2 { font-size: 46px; letter-spacing: -0.035em; line-height: 1.05; max-width: 18ch; }
+  .sec h2 .shine { animation-duration: 12s; }
+  .sec .sub { font-size: 18px; max-width: 58ch; margin: 16px 0 44px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .card { position: relative; border-radius: 20px; padding: 24px; background: #fff; border: 1px solid var(--border); overflow: hidden;
+          box-shadow: 0 1px 2px rgba(15,42,35,.04), 0 12px 30px -16px rgba(15,42,35,.18); }
+  .card::after { content: ""; position: absolute; width: 220px; height: 220px; right: -80px; top: -90px; border-radius: 50%; filter: blur(40px); opacity: .35; }
+  .card:nth-child(1)::after { background: #5eead4; } .card:nth-child(2)::after { background: #93c5fd; } .card:nth-child(3)::after { background: #c4b5fd; }
+  .card .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-size: 18px; margin-bottom: 16px; background: var(--grad);
+              box-shadow: 0 8px 20px -8px rgba(59,130,246,.6); }
+  .card h3 { font-size: 18px; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .card p { margin: 0; font-size: 15px; }
+  .stat { font-size: 40px; font-weight: 750; letter-spacing: -0.04em; line-height: 1; margin: 18px 0 2px; }
+  .stat-label { font-size: 13px; }
+
+  .note { max-width: 1140px; margin: 0 auto; padding: 0 20px 60px; font-size: 13px; color: #8a9893; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="sky">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+
+  <nav class="nav">
+    <div class="brand"><svg class="logo" width="28" height="28"></svg>Rota Wise</div>
+    <div class="links"><a>How it works</a><a>Features</a><a>Under the hood</a><a class="gh">★ Star on GitHub</a></div>
+  </nav>
+
+  <section class="hero">
+    <span class="badge"><span class="new">NEW</span> Shift patterns from plain English, powered by Claude <span class="arrow">→</span></span>
+    <h1 class="big">Your rota, in <span class="shine">your words.</span></h1>
+    <p class="lede">Describe when your volunteers are needed the way you'd say it out loud. Rota Wise turns it into a schedule, asks volunteers when they're free, and solves who works when.</p>
+    <div class="cta">
+      <a class="btn primary"><span class="spark">✦</span> See it work</a>
+      <a class="btn ghost">★ View the code</a>
+    </div>
+  </section>
+
+  <div class="stage">
+    <div class="board">
+      <div class="board-top">
+        <span class="prompt-label"><span class="dot"></span>Shift pattern</span>
+        <span class="model"><b>claude-sonnet</b> · structured output</span>
+      </div>
+      <div class="sentence"><mark class="m1">Every Saturday</mark> <mark class="m2">10am to 2pm</mark>, and <mark class="m3">the first Sunday of the month</mark> <mark class="m4">12 till 4</mark><span class="caret"></span></div>
+      <div class="gap"></div>
+      <div class="out">
+        <div class="chip" data-title="Event 1"><span class="k">BEGIN:</span>VEVENT
+<span class="k">DTSTART:</span>20261107T<span class="p2">100000</span>
+<span class="k">DURATION:</span><span class="p2">PT4H</span>
+<span class="k">RRULE:</span><span class="p1">FREQ=WEEKLY;BYDAY=SA</span>
+<span class="k">END:</span>VEVENT</div>
+        <div class="chip" data-title="Event 2"><span class="k">BEGIN:</span>VEVENT
+<span class="k">DTSTART:</span>20261101T<span class="p4">120000</span>
+<span class="k">DURATION:</span><span class="p4">PT4H</span>
+<span class="k">RRULE:</span><span class="p3">FREQ=MONTHLY;BYDAY=1SU</span>
+<span class="k">END:</span>VEVENT</div>
+        <div class="cal-wrap">
+          <div class="cal-head">November 2026 <span>5 shifts</span></div>
+          <div class="cal" data-cal></div>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="pill ok">✓ <b>Parser accepted</b> first reply</span>
+        <span class="pill"><b>64</b> shifts in the next year</span>
+        <span class="pill"><b>1.8s</b> to translate</span>
+        <span class="pill">Saved only once you confirm</span>
+      </div>
+      <svg data-lines></svg>
+    </div>
+  </div>
+
+  <div class="built">BUILT WITH
+    <div class="row"><span>Go</span><span>React</span><span>Claude</span><span>CP-SAT</span><span>PostgreSQL</span></div>
+  </div>
+</div>
+
+<section class="sec">
+  <div class="kicker">Under the hood</div>
+  <h2>A language model you can <span class="shine">trust with a calendar.</span></h2>
+  <p class="sub">The translator is held to the same standard as the rest of the code. A parser checks every reply before it's shown, and an eval suite grades every model against a year of real dates.</p>
+  <div class="cards">
+    <div class="card"><div class="ic">⟲</div><h3>Parser-checked retry</h3><p>A refused reply goes back to the model with the parser's own message, up to three tries.</p>
+      <div class="stat shine">3 tries</div><div class="stat-label">then a clear error, never a guess</div></div>
+    <div class="card"><div class="ic">◎</div><h3>Graded by shifts</h3><p>Evals compare the dates a pattern produces, so two ways of writing the same rule both pass.</p>
+      <div class="stat shine">365 days</div><div class="stat-label">of shifts checked per case</div></div>
+    <div class="card"><div class="ic">⚖</div><h3>Model matrix + judge</h3><p>Every candidate model compared on accuracy, cost and latency, with Opus grading the explanations.</p>
+      <div class="stat shine">Opus</div><div class="stat-label">as judge</div></div>
+  </div>
+</section>
+
+<p class="note">Mockup: direction C restyled. The board is the still frame #350 animates (typing, then the lines draw in). The "1.8s" and stat copy are placeholders to check against the eval reports.</p>
+
+<script>
+  const mark = `<rect x="2" y="2" width="28" height="28" rx="7" fill="#2f6f5e"/><rect x="2" y="2" width="28" height="9" rx="7" fill="#1f4f42"/><rect x="2" y="7" width="28" height="4" fill="#1f4f42"/><g fill="#fff"><rect x="6" y="15" width="4" height="11" rx="1.5"/><rect x="11.5" y="15" width="4" height="7" rx="1.5" opacity=".4"/><rect x="17" y="15" width="4" height="11" rx="1.5"/><rect x="22.5" y="15" width="4" height="4" rx="1.5" opacity=".4"/></g>`;
+  document.querySelectorAll("svg.logo").forEach(s => { s.setAttribute("viewBox", "0 0 32 32"); s.innerHTML = mark; });
+
+  document.querySelectorAll("[data-cal]").forEach(el => {
+    let h = ["M","T","W","T","F","S","S"].map(d => `<div class="dow">${d}</div>`).join("");
+    for (let i = 0; i < 6; i++) h += `<div class="d blank"></div>`;
+    for (let d = 1; d <= 30; d++) {
+      const dow = (6 + d - 1) % 7;
+      const cls = d === 1 ? "on2" : dow === 5 ? "on" : "";
+      h += `<div class="d ${cls}">${d}</div>`;
+    }
+    el.innerHTML = h;
+  });
+
+  function thread() {
+    const board = document.querySelector(".board"), svg = board.querySelector("svg[data-lines]");
+    const b = board.getBoundingClientRect();
+    const cols = { 1: "#2563eb", 2: "#0d9488", 3: "#8b5cf6", 4: "#db2777" };
+    let out = "";
+    for (const k in cols) {
+      const m = board.querySelector(".m" + k).getBoundingClientRect();
+      const span = board.querySelector(".chip .p" + k), t = span.getBoundingClientRect(), c = span.closest(".chip").getBoundingClientRect();
+      const x1 = m.left + m.width / 2 - b.left, y1 = m.bottom - b.top + 22;
+      const x2 = t.left + Math.min(t.width / 2, 30) - b.left, y2 = c.top - b.top - 4;
+      const my = (y1 + y2) / 2;
+      out += `<circle cx="${x1}" cy="${y1}" r="3" fill="${cols[k]}"/>`;
+      out += `<path d="M${x1} ${y1} C${x1} ${my}, ${x2} ${my}, ${x2} ${y2}" stroke="${cols[k]}" stroke-width="1.75" fill="none" stroke-linecap="round"/>`;
+      out += `<circle cx="${x2}" cy="${y2}" r="3.5" fill="#0d1714" stroke="${cols[k]}" stroke-width="2"/>`;
+    }
+    svg.innerHTML = out;
+  }
+  document.fonts.ready.then(thread); addEventListener("resize", thread);
+</script>
+</body>
+</html>
