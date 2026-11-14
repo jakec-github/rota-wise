@@ -59,31 +59,38 @@ func frontendHandler(frontend fs.FS, base string) http.Handler {
 	})
 }
 
-// rootFrontendHandler serves the frontend outside every Organisation: its
-// assets at the root, index.html unchanged — its <base> already says the root —
-// at /, and the same index.html with a 404 for every other path. The app reads
-// the empty base path as "no Organisation" and draws the splash or its
-// "Page not found" from the path, so a missing page and an unknown
-// Organisation's address get the identical response.
-// rootPages are the app's own pages outside every Organisation: the splash
-// and the organiser's guide. web/dev.ts keeps the same list.
-var rootPages = map[string]bool{"": true, "guide": true}
+// rootPages are the app's own pages outside every Organisation. web/dev.ts
+// keeps the same list.
+var rootPages = map[string]bool{"guide": true}
 
-func rootFrontendHandler(frontend fs.FS) http.Handler {
-	site := frontendHandler(frontend, "")
+// rootFrontendHandler serves everything at the root that is not the server's
+// own: the splash at / and its assets under /site/, the app's assets at the
+// root, the app itself — base unchanged, it already says the root — at the
+// rootPages, and the same index.html with a 404 for every other path. The app
+// reads the empty base path as "no Organisation" and draws its "Page not
+// found", so a missing page and an unknown Organisation's address get the
+// identical response. A missing splash asset gets it too.
+//
+// With no splash in site, / is left to the app like any other root page.
+func rootFrontendHandler(frontend, site fs.FS) http.Handler {
+	app := frontendHandler(frontend, "")
+	splash, assets := splashFiles(site)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := strings.TrimPrefix(r.URL.Path, "/")
+		if path == "" && splash != nil {
+			serveSplash(w, r, splash)
+			return
+		}
 		if r.Method != http.MethodGet && r.Method != http.MethodHead && path != "" {
 			http.NotFound(w, r)
 			return
 		}
-		if rootPages[path] {
-			site.ServeHTTP(w, r)
+		if asset, ok := strings.CutPrefix(path, "site/"); ok && assets != nil && isFile(assets, asset) {
+			http.StripPrefix("/site", http.FileServerFS(assets)).ServeHTTP(w, r)
 			return
 		}
-		if f, err := frontend.Open(path); err == nil {
-			f.Close()
-			site.ServeHTTP(w, r)
+		if rootPages[path] || (path == "" && splash == nil) || (!strings.HasPrefix(path, "site/") && isFile(frontend, path)) {
+			app.ServeHTTP(w, r)
 			return
 		}
 		index, err := fs.ReadFile(frontend, "index.html")
@@ -95,6 +102,44 @@ func rootFrontendHandler(frontend fs.FS) http.Handler {
 		w.WriteHeader(http.StatusNotFound)
 		_, _ = w.Write(index)
 	})
+}
+
+// splashFiles reads the splash page and the filesystem of its assets out of
+// site, or nil for both when site holds no page.
+func splashFiles(site fs.FS) ([]byte, fs.FS) {
+	if site == nil {
+		return nil, nil
+	}
+	page, err := fs.ReadFile(site, "index.html")
+	if err != nil {
+		return nil, nil
+	}
+	assets, err := fs.Sub(site, "static")
+	if err != nil {
+		return page, nil
+	}
+	return page, assets
+}
+
+// serveSplash writes the splash page. Like every page, it is only ever fetched.
+func serveSplash(w http.ResponseWriter, r *http.Request, page []byte) {
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		w.Header().Set("Allow", "GET, HEAD")
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write(page)
+}
+
+// isFile reports whether name is a file in fsys — not a directory, which the
+// file server would answer with a listing.
+func isFile(fsys fs.FS, name string) bool {
+	if name == "" {
+		return false
+	}
+	info, err := fs.Stat(fsys, name)
+	return err == nil && !info.IsDir()
 }
 
 // withBase points index.html's <base> element at the path the site is served

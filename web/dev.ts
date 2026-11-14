@@ -32,7 +32,8 @@ const organisationAPIPrefixes = ["/api", "/auth", "/calendars"];
 // Outside every Organisation, the paths that are still the Go server's.
 const rootServerPrefixes = ["/auth", "/health"];
 // The app's own pages outside every Organisation, as in pkg/api/frontend.go.
-const rootPages = ["/", "/guide"];
+// / is not one of them: it is the splash, a static page of its own in ../site.
+const rootPages = ["/guide"];
 const organisationPath = /^\/org\/([a-z0-9][a-z0-9-]*)(\/.*)?$/;
 
 // How long a proxied request may take before this server gives up on it.
@@ -73,7 +74,8 @@ const server = Bun.serve({
       });
 
     // index.html as built, its <base> at the root: the app outside every
-    // Organisation, which draws the splash at / and "Page not found" elsewhere.
+    // Organisation, which draws the guide at /guide and "Page not found"
+    // elsewhere.
     // As in prod (pkg/api/frontend.go), the 404 is the same page with the
     // status, whatever path asked for it.
     const rootIndex = async (status: number) =>
@@ -82,8 +84,10 @@ const server = Bun.serve({
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
 
-    // Outside every Organisation, /auth and /health are the Go server's; the
-    // rest is the frontend with its base at the root, assets included.
+    // Outside every Organisation, /auth and /health are the Go server's, / is
+    // the splash with its assets under /site/, and the rest is the frontend
+    // with its base at the root, assets included. As in prod, read from disk
+    // on every request so an edit to ../site shows on reload.
     const match = organisationPath.exec(pathname);
     if (!match) {
       if (
@@ -92,6 +96,18 @@ const server = Bun.serve({
         )
       ) {
         return proxy();
+      }
+      if (pathname === "/") {
+        return new Response(Bun.file("../site/index.html"), {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      }
+      if (pathname.startsWith("/site/")) {
+        const asset = Bun.file(`../site/static${pathname.slice("/site".length)}`);
+        if (!pathname.includes("..") && (await asset.exists())) {
+          return new Response(asset);
+        }
+        return rootIndex(404);
       }
       if (rootPages.includes(pathname)) return rootIndex(200);
       if (pathname !== "/index.html") {

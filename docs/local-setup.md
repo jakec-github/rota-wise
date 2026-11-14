@@ -173,8 +173,8 @@ llm:
   effort: 'low'                              # optional; low, medium, high, xhigh or max
 ```
 
-The app is then at `http://localhost:5173/org/my-organisation/`; `/` is a splash
-page that links nowhere.
+The app is then at `http://localhost:5173/org/my-organisation/`; `/` is the splash
+page, served from `site/` and read from disk, so an edit to it shows on reload.
 
 The `test` directory matches the `-e test` / `-env test` flag you pass at
 runtime: every file an environment needs lives in `env/<env>/`, and that is the

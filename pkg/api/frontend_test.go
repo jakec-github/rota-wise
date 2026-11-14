@@ -15,6 +15,12 @@ var testFrontend = fstest.MapFS{
 	"chunk-abc.js": {Data: []byte("console.log(1)")},
 }
 
+// testSite stands in for package site: the splash page and one asset.
+var testSite = fstest.MapFS{
+	"index.html":        {Data: []byte(`<html>splash</html>`)},
+	"static/splash.css": {Data: []byte("body{}")},
+}
+
 // testIndex is what the stand-in build's index.html serves as for apiTestCfg's
 // Organisation, its base tag pointing at /org/test-org/.
 const testIndex = `<html><head><base href="/org/test-org/" /></head>app</html>`
